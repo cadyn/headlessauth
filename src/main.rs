@@ -151,6 +151,7 @@ struct UserData {
     id: String,
 }
 
+/// Gets the Resonite UserID from a given username.
 #[poise::command(slash_command, check = "channel_check")]
 pub async fn userid(
     ctx: Context<'_>,
@@ -172,6 +173,7 @@ pub async fn userid(
     Ok(())
 }
 
+/// Admin only command to set channel for bot to be used in.
 #[poise::command(slash_command, check = "admin_check")]
 pub async fn setchannel(
     ctx: Context<'_>,
@@ -205,6 +207,7 @@ pub async fn setchannel(
     Ok(())
 }
 
+/// Admin only command to add roles to admin access to the bot
 #[poise::command(slash_command, check = "admin_check")]
 pub async fn addrole (
     ctx: Context<'_>,
@@ -250,6 +253,7 @@ pub async fn addrole (
     Ok(())
 }
 
+/// Admin only command to remove roles from admin access to the bot
 #[poise::command(slash_command, check = "admin_check")]
 pub async fn removerole (
     ctx: Context<'_>,
@@ -292,6 +296,7 @@ pub async fn removerole (
     Ok(())
 }
 
+/// Admin only command to add users from the admin whitelist
 #[poise::command(slash_command, check = "admin_check")]
 pub async fn adduser(
     ctx: Context<'_>,
@@ -337,7 +342,7 @@ pub async fn adduser(
     }
 }
 
-
+/// Admin only command to remove users from the admin whitelist
 #[poise::command(slash_command, check = "admin_check")]
 pub async fn removeuser(
     ctx: Context<'_>,
@@ -381,6 +386,7 @@ pub async fn removeuser(
     }
 }
 
+/// Register your UserID with the headless whitelist or change your registered UserID.
 #[poise::command(slash_command, check = "channel_check")]
 pub async fn register(
     ctx: Context<'_>,
