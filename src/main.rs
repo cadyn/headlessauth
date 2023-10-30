@@ -14,6 +14,7 @@ use axum::{
     routing::get,
     Router,
 };
+use axum_server::tls_rustls::RustlsConfig;
 
 use poise::serenity_prelude as serenity;
 
@@ -483,6 +484,13 @@ async fn web() {
     // initialize tracing
     //tracing_subscriber::fmt::init();
 
+    let config = RustlsConfig::from_pem_file(
+        PathBuf::from(std::env::var("SERVER_SSL_CERT").expect("No SSL Cert provided")),
+        PathBuf::from(std::env::var("SERVER_SSL_KEY").expect("No SSL Key provided"))
+    )
+    .await
+    .unwrap();
+
     // build our application with a route
     let app = Router::new()
         // `GET /` goes to `root`
@@ -490,7 +498,7 @@ async fn web() {
 
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 2096));
-    axum::Server::bind(&addr)
+    axum_server::bind_rustls(addr, config)
         .serve(app.into_make_service())
         .await
         .unwrap();
