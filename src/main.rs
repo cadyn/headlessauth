@@ -12,6 +12,7 @@ use tokio::fs::{OpenOptions,File};
 use serde::{Serialize, Deserialize};
 
 use axum::{
+    extract::Path,
     routing::get,
     Router,
 };
@@ -330,7 +331,7 @@ pub async fn adduser(
     if !check_userid(&ctx, &uid).await? {
         return Ok(());
     }
-    
+
     let dir = get_dir()?;
     let file_path = dir.join("usersadmin.txt");
 
@@ -524,7 +525,8 @@ async fn web() {
     // build our application with a route
     let app = Router::new()
         // `GET /` goes to `root`
-        .route("/", get(root));
+        .route("/", get(root))
+        .route("/check/:userid", get(is_whitelisted));
 
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 2096));
@@ -579,4 +581,58 @@ async fn root() -> String {
     file.unlock().unwrap();
 
     return data_string.trim().to_string();
+}
+
+async fn is_whitelisted(Path(userid): Path<String>) -> String {
+    let dir = get_dir().unwrap();
+    //First read from the admin file as it's already in the format we need
+    let file_path = dir.join("usersadmin.txt");
+
+    let mut file = match OpenOptions::new().read(true).write(true).create(true).open(file_path).await {
+        Err(e) => {
+            println!("openoptions:{e:?}");
+            panic!("{e:?}");
+        },
+        Ok(res) => res
+    };
+    file.lock_shared().unwrap();
+
+    let buf = BufReader::new(&mut file);
+
+    let mut lines: Vec<String> = Vec::new();
+    let mut lines_reader = buf.lines();
+
+    while let Some(next_line) = lines_reader.next_line().await.unwrap() {
+        lines.push(next_line.clone());
+    }
+
+    file.unlock().unwrap();
+    
+    //Next read from the auth file and do it by line so we only grab the bits we want.
+    let dir = get_dir().unwrap();
+    let file_path = dir.join("usersauth.txt");
+
+    let mut file = match OpenOptions::new().read(true).write(true).create(true).open(file_path).await {
+        Err(e) => {
+            println!("openoptions:{e:?}");
+            panic!("{e:?}");
+        },
+        Ok(res) => res
+    };
+    file.lock_shared().unwrap();
+
+    let buf = BufReader::new(&mut file);
+    let mut lines_reader = buf.lines();
+
+    while let Some(next_line) = lines_reader.next_line().await.unwrap() {
+        let resuid: &str = next_line.split('=').collect::<Vec<&str>>()[1];
+        lines.push(resuid.to_string());
+    }
+    
+    file.unlock().unwrap();
+
+    if lines.contains(&userid) {
+        return "TRUE".to_string()
+    }
+    return "FALSE".to_string();
 }
