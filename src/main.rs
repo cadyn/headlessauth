@@ -6,6 +6,7 @@ use directories::ProjectDirs;
 
 use fs4::tokio::AsyncFileExt;
 
+use reqwest::StatusCode;
 use tokio::io::{AsyncWriteExt,BufReader,AsyncBufReadExt, AsyncReadExt};
 use tokio::fs::{OpenOptions,File};
 use serde::{Serialize, Deserialize};
@@ -395,6 +396,21 @@ pub async fn register(
     #[description = "Resonite UserID"]
     uid: String,
 ) -> Result<(), Error> {
+    let response = reqwest::get(format!("https://api.resonite.com/users/{uid}")).await?.status();
+    let code = response.as_u16();
+
+    match response {
+        StatusCode::NOT_FOUND => {
+            ctx.say("Invalid UserID, make sure capitalizations are correct and try checking with `/userid <username>`").await?;
+            return Ok(());
+        },
+        StatusCode::OK => (),
+        _ => {
+            ctx.say(format!("Error validating UserID with Resonite API, error code {code}. Please try again later or report this to Cadyn.")).await?;
+            return Ok(())
+        }
+    }
+
     let dir = get_dir()?;
     let file_path = dir.join("usersauth.txt");
 
@@ -548,5 +564,5 @@ async fn root() -> String {
     
     file.unlock().unwrap();
 
-    return data_string;
+    return data_string.trim().to_string();
 }
