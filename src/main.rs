@@ -401,7 +401,11 @@ pub async fn register(
 
     match response {
         StatusCode::NOT_FOUND => {
-            ctx.say("Invalid UserID, make sure capitalizations are correct and try checking with `/userid <username>`").await?;
+            ctx.say("UserID not found, make sure capitalizations are correct and try checking with `/userid <username>`").await?;
+            return Ok(());
+        },
+        StatusCode::BAD_REQUEST => {
+            ctx.say("UserID invalid format. UserID should look like `U-xxxx`. To get your UserID, try using `/userid <username`").await?;
             return Ok(());
         },
         StatusCode::OK => (),
