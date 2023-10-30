@@ -437,6 +437,16 @@ pub async fn register(
     }
 }
 
+#[poise::command(slash_command, prefix_command)]
+pub async fn help(ctx: Context<'_>, command: Option<String>) -> Result<(), Error> {
+    let configuration = poise::builtins::HelpConfiguration {
+        // [configure aspects about the help message here]
+        ..Default::default()
+    };
+    poise::builtins::help(ctx, command.as_deref(), configuration).await?;
+    Ok(())
+}
+
 fn main() {
     let t1 = thread::spawn(|| {
         discord();
@@ -453,7 +463,7 @@ fn main() {
 async fn discord() {
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: vec![register(),userid(),setchannel(),addrole(),removerole(),adduser(),removeuser()],
+            commands: vec![register(),userid(),setchannel(),addrole(),removerole(),adduser(),removeuser(),help()],
             ..Default::default()
         })
         .token(std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN"))
