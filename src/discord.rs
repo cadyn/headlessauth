@@ -68,12 +68,16 @@ pub async fn status(
         ClosedStatus::Automatic => if data.is_currently_closed() {"Automatically closed"} else {"Automatically open"},
     };
 
+    let next_open_str =  if next_open == i64::MAX {"No scheduled openings".to_string()} else {format!("<t:{next_open}:f>")};
+
+    let next_closed_str =  if next_close == i64::MAX {"No scheduled closings".to_string()} else {format!("<t:{next_close}:f>")};
+
     ctx.send(|b| b.embed(|embed| {
         embed.color(serenity::colours::branding::BLURPLE);
         embed.title("Headless status");
         embed.field("Current whitelist status", close_status, false);
-        embed.field("Next scheduled whitelist closing", format!("<t:{next_close}:f>"), false);
-        embed.field("Next scheduled whitelist opening", format!("<t:{next_open}:f>"), false);
+        embed.field("Next scheduled whitelist closing", next_closed_str, false);
+        embed.field("Next scheduled whitelist opening", next_open_str, false);
         if let Some(players) = num_players {
             embed.field("Number of players online", format!("{players}"), false);
         }
