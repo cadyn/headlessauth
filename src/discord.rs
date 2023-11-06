@@ -48,6 +48,7 @@ pub async fn userid(
     Ok(())
 }
 
+/// Provides a list of all commands and some basic information about them.
 #[poise::command(slash_command, prefix_command)]
 pub async fn help(ctx: Context<'_>, command: Option<String>) -> Result<(), Error> {
     let configuration = poise::builtins::HelpConfiguration {
@@ -63,7 +64,7 @@ pub async fn help(ctx: Context<'_>, command: Option<String>) -> Result<(), Error
 pub async fn discord() {
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: vec![register(),userid(),setchannel(),addrole(),removerole(),adduser(),removeuser(),help(),adduserclosed(),removeuserclosed(),setclosed(),addcloseevent(),removecloseevent(),listevents()],
+            commands: vec![register(),userid(),status(),help(),setchannel(),addrole(),removerole(),adduser(),removeuser(),adduserclosed(),removeuserclosed(),setclosed(),addcloseevent(),removecloseevent(),listevents()],
             ..Default::default()
         })
         .token(std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN"))

@@ -40,6 +40,7 @@ impl RepeatingEvent {
             _ => return self.initial + (average_seconds(self.repeating.t) * self.repeating.n * n),
         }
     }
+    
     pub fn most_recent(&self) -> i64 {
         let now: i64 = Utc::now().timestamp();
         
@@ -54,9 +55,25 @@ impl RepeatingEvent {
 
         return self.nth(i);
     }
+
     pub fn elapsed(&self) -> i64 {
         let now: i64 = Utc::now().timestamp();
         return now - self.most_recent();
+    }
+
+    pub fn next(&self) -> i64 {
+        let now: i64 = Utc::now().timestamp();
+        
+        //Use average number of seconds per repeat to get a good starting point, then iterate until nth(i - 1) is in the past.
+        let diff = now - self.initial;
+        let approx_n = diff / average_seconds(self.repeating.t);
+        let mut i = approx_n + 1;
+        
+        while self.nth(i-1) > now {
+            i-=1;
+        }
+
+        return self.nth(i);
     }
 }
 

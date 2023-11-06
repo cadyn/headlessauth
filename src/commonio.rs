@@ -58,6 +58,30 @@ impl ClosedData {
 
         return close_elapsed < open_elapsed;
     }
+
+    pub fn next_close_event(&self) -> i64 {
+        let mut soonest_event: i64 = i64::MAX;
+        for event in self.close_events.values() {
+            let next_instance = event.next();
+            if next_instance < soonest_event {
+                soonest_event = next_instance;
+            }
+        }
+
+        return soonest_event;
+    }
+
+    pub fn next_open_event(&self) -> i64 {
+        let mut soonest_event: i64 = i64::MAX;
+        for event in self.open_events.values() {
+            let next_instance = event.next();
+            if next_instance < soonest_event {
+                soonest_event = next_instance;
+            }
+        }
+
+        return soonest_event;
+    }
 }
 
 
