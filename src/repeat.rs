@@ -48,7 +48,7 @@ impl RepeatingEvent {
                 let new_dt = initial_dt.with_year(year).unwrap();
                 return new_dt.timestamp();
             }
-            _ => return self.initial + (average_seconds(self.repeating.t) * self.repeating.n * n),
+            _ => return self.initial + (average_seconds(self.repeating)* n),
         }
     }
     
@@ -57,7 +57,7 @@ impl RepeatingEvent {
         
         //Use average number of seconds per repeat to get a good starting point, then iterate until nth(i + 1) is in the future.
         let diff = now - self.initial;
-        let approx_n = diff / average_seconds(self.repeating.t);
+        let approx_n = diff / average_seconds(self.repeating);
         let mut i = approx_n - 1;
         
         while self.nth(i+1) < now {
@@ -77,7 +77,7 @@ impl RepeatingEvent {
         
         //Use average number of seconds per repeat to get a good starting point, then iterate until nth(i - 1) is in the past.
         let diff = now - self.initial;
-        let approx_n = diff / average_seconds(self.repeating.t);
+        let approx_n = diff / average_seconds(self.repeating);
         let mut i = approx_n + 1;
         
         while self.nth(i-1) > now {
@@ -88,8 +88,8 @@ impl RepeatingEvent {
     }
 }
 
-fn average_seconds(t: RepeatType) -> i64 {
-    match t {
+fn average_seconds(interval: RepeatInterval) -> i64 {
+    let t_sec = match interval.t {
         RepeatType::Seconds => 1,
         RepeatType::Minutes => 60,
         RepeatType::Hours => 3600,
@@ -97,10 +97,11 @@ fn average_seconds(t: RepeatType) -> i64 {
         RepeatType::Weeks => 604800,
         RepeatType::Months => 2628288,
         RepeatType::Years => 31556952,
-    }
+    };
+    return t_sec * interval.n;
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub struct RepeatInterval {
     pub t: RepeatType,
     pub n: i64,
