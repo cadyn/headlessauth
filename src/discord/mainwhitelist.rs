@@ -6,7 +6,7 @@ use crate::commonio::*;
 use super::checks::*;
 use super::common::check_userid;
 
-/// Admin only command to add users from the admin whitelist
+/// Admin only command to add users to the admin whitelist
 #[poise::command(slash_command, check = "admin_check")]
 pub async fn adduser(
     ctx: Context<'_>,

@@ -6,7 +6,7 @@ use crate::repeat::*;
 use super::checks::*;
 use super::common::check_userid;
 
-/// Admin only command to add users from the admin whitelist
+/// Admin only command to add users to the closed whitelist
 #[poise::command(slash_command, check = "admin_check")]
 pub async fn adduserclosed(
     ctx: Context<'_>,
@@ -56,7 +56,7 @@ pub async fn adduserclosed(
     }
 }
 
-/// Admin only command to remove users from the admin whitelist
+/// Admin only command to remove users from the closed whitelist
 #[poise::command(slash_command, check = "admin_check")]
 pub async fn removeuserclosed(
     ctx: Context<'_>,
@@ -100,7 +100,7 @@ pub async fn removeuserclosed(
     }
 }
 
-/// Set the headless to closed mode.
+/// Admin only command to set the headless to closed mode.
 #[poise::command(slash_command, check = "admin_check")]
 pub async fn setclosed(
     ctx: Context<'_>,
@@ -126,7 +126,7 @@ pub async fn setclosed(
 
 
 
-/// Add a repeating time to automatically set the headless to closed
+/// Admin only command to add a repeating time to automatically set the headless to closed
 #[poise::command(slash_command, check = "admin_check")]
 pub async fn addcloseevent(
     ctx: Context<'_>,
@@ -155,7 +155,7 @@ pub async fn addcloseevent(
     Ok(())
 }
 
-/// Add a repeating time to automatically set the headless to open
+/// Admin only command to add a repeating time to automatically set the headless to open
 #[poise::command(slash_command, check = "admin_check")]
 pub async fn addopenevent(
     ctx: Context<'_>,
@@ -185,7 +185,7 @@ pub async fn addopenevent(
     Ok(())
 }
 
-/// Remove an opening event
+/// Admin only command to remove an opening event
 #[poise::command(slash_command, check = "admin_check")]
 pub async fn removeopenevent(
     ctx: Context<'_>,
@@ -213,7 +213,7 @@ pub async fn removeopenevent(
     Ok(())
 }
 
-/// Remove an closing event
+/// Admin only command to remove a closing event
 #[poise::command(slash_command, check = "admin_check")]
 pub async fn removecloseevent(
     ctx: Context<'_>,
@@ -242,7 +242,7 @@ pub async fn removecloseevent(
 }
 
 
-/// Show all events for opening and closing the headless
+/// Admin only command to show all events for opening and closing the headless
 #[poise::command(slash_command, check = "admin_check")]
 pub async fn listevents(
     ctx: Context<'_>,
