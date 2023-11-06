@@ -2,6 +2,7 @@ use fs4::tokio::AsyncFileExt;
 use tokio::io::{BufReader, AsyncBufReadExt};
 
 use crate::commonio::*;
+use crate::repeat::*;
 use super::checks::*;
 use super::common::check_userid;
 
@@ -143,7 +144,7 @@ pub async fn addcloseevent(
         *data.close_events.keys().max().unwrap() + 1
     };
 
-    data.close_events.insert(current_id, RepeatingEvent{id: current_id, initial: timestamp, repeating: RepeatingDate::from_input(t,n)});
+    data.close_events.insert(current_id, RepeatingEvent{id: current_id, initial: timestamp, repeating: RepeatInterval{t,n}});
 
     write_tmp_and_copy(&ctx, &file_path, file, &serde_json::to_string(&data)?).await?;
     
@@ -172,7 +173,7 @@ pub async fn addopenevent(
         *data.open_events.keys().max().unwrap() + 1
     };
 
-    data.open_events.insert(current_id, RepeatingEvent{id: current_id, initial: timestamp, repeating: RepeatingDate::from_input(t,n)});
+    data.open_events.insert(current_id, RepeatingEvent{id: current_id, initial: timestamp, repeating: RepeatInterval{t,n}});
     
 
     write_tmp_and_copy(&ctx, &file_path, file, &serde_json::to_string(&data)?).await?;
@@ -196,7 +197,7 @@ pub async fn removeopenevent(
 
     if let Some(value) = data.open_events.remove(&id) {
 
-        let (t, n) = value.repeating.decompose();
+        let (t, n) = (value.repeating.t, value.repeating.n);
         let type_s = t.to_string() + if n > 1 {"s"} else {""};
         let most_recent = value.most_recent();
 
@@ -224,7 +225,7 @@ pub async fn removecloseevent(
 
     if let Some(value) = data.close_events.remove(&id) {
 
-        let (t, n) = value.repeating.decompose();
+        let (t, n) = (value.repeating.t, value.repeating.n);
         let type_s = t.to_string() + if n > 1 {"s"} else {""};
         let most_recent = value.most_recent();
 
@@ -255,7 +256,7 @@ pub async fn listevents(
 
         for event in data.open_events.values() {
             let most_recent = event.most_recent();
-            let (t,n) = event.repeating.decompose();
+            let (t,n) = (event.repeating.t, event.repeating.n);
             let type_s = t.to_string() + if n > 1 {"s"} else {""};
             let val = format!("<t:{most_recent}:f> every {n} {type_s}");
             embed.field(event.id, val, false);
@@ -269,7 +270,7 @@ pub async fn listevents(
 
         for event in data.close_events.values() {
             let most_recent = event.most_recent();
-            let (t,n) = event.repeating.decompose();
+            let (t,n) = (event.repeating.t, event.repeating.n);
             let type_s = t.to_string() + if n > 1 {"s"} else {""};
             let val = format!("<t:{most_recent}:f> every {n} {type_s}");
             embed.field(event.id, val, false);

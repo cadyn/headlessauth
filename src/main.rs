@@ -1,6 +1,7 @@
 pub mod web;
 pub mod commonio;
 pub mod discord;
+pub mod repeat;
 
 use std::thread;
 

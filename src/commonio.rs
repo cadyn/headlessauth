@@ -10,18 +10,7 @@ use tokio::fs::{OpenOptions,File};
 
 use serde::{Serialize, Deserialize};
 
-use chrono::{DateTime, Utc, Datelike};
-
-#[derive(poise::ChoiceParameter, Clone, Copy)]
-pub enum RepeatType {
-    Seconds,
-    Minutes,
-    Hours,
-    Days,
-    Weeks,
-    Months,
-    Years,
-}
+use crate::repeat::RepeatingEvent;
 
 #[derive(Serialize, Deserialize, Debug,poise::ChoiceParameter, Clone, Copy)]
 pub enum ClosedStatus {
@@ -71,88 +60,6 @@ impl ClosedData {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct RepeatingEvent {
-    pub id: usize,
-    pub initial: i64,
-    pub repeating: RepeatingDate,
-}
-
-impl RepeatingEvent {
-    pub fn nth(&self, n: i64) -> i64 {
-        match self.repeating {
-            RepeatingDate::Seconds(x) => self.initial + (x * n),
-            RepeatingDate::Minutes(x) => self.initial + (x * 60 * n),
-            RepeatingDate::Hours(x) => self.initial + (x * 3600 * n),
-            RepeatingDate::Days(x) => self.initial + (x * 86400 * n),
-            RepeatingDate::Weeks(x) => self.initial + (x * 604800 * n),
-            RepeatingDate::Months(x) => {
-                let initial_dt: DateTime<Utc> = DateTime::from_timestamp(self.initial, 0).unwrap();
-                let pre_month = initial_dt.month() as i64 + (x * n);
-                let year = (initial_dt.year() as i64 + (pre_month / 12)) as i32;
-                let month = (pre_month % 12) as u32;
-                let new_dt = initial_dt.with_month(month).unwrap().with_year(year).unwrap();
-                return new_dt.timestamp();
-            },
-            RepeatingDate::Years(x) => {
-                let initial_dt: DateTime<Utc> = DateTime::from_timestamp(self.initial, 0).unwrap();
-                let year = (initial_dt.year() as i64 + (x * n)) as i32;
-                let new_dt = initial_dt.with_year(year).unwrap();
-                return new_dt.timestamp();
-            }
-        }
-    }
-    pub fn most_recent(&self) -> i64 {
-        let now: i64 = Utc::now().timestamp();
-        //let most_recent: DateTime<Utc> = DateTime::from_timestamp(self.initial, 0).unwrap();
-        let mut i = 0;
-        while self.nth(i+1) < now {
-            i+=1;
-        }
-        let most_recent: DateTime<Utc> = DateTime::from_timestamp(self.nth(i),0).unwrap();
-        return most_recent.timestamp();
-    }
-    pub fn elapsed(&self) -> i64 {
-        let now: i64 = Utc::now().timestamp();
-        return now - self.most_recent();
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub enum RepeatingDate {
-    Seconds(i64),
-    Minutes(i64),
-    Hours(i64),
-    Days(i64),
-    Weeks(i64),
-    Months(i64),
-    Years(i64),
-}
-
-impl RepeatingDate {
-    pub fn from_input(t: RepeatType, num: i64) -> Self {
-        match t {
-            RepeatType::Seconds => RepeatingDate::Seconds(num),
-            RepeatType::Minutes => RepeatingDate::Minutes(num),
-            RepeatType::Hours => RepeatingDate::Hours(num),
-            RepeatType::Days => RepeatingDate::Days(num),
-            RepeatType::Weeks => RepeatingDate::Weeks(num),
-            RepeatType::Months => RepeatingDate::Months(num),
-            RepeatType::Years => RepeatingDate::Years(num),
-        }
-    }
-    pub fn decompose(&self) -> (RepeatType, i64) {
-        match self {
-            RepeatingDate::Seconds(num) => (RepeatType::Seconds, *num),
-            RepeatingDate::Minutes(num) => (RepeatType::Minutes, *num),
-            RepeatingDate::Hours(num) => (RepeatType::Hours, *num),
-            RepeatingDate::Days(num) => (RepeatType::Days, *num),
-            RepeatingDate::Weeks(num) => (RepeatType::Weeks, *num),
-            RepeatingDate::Months(num) => (RepeatType::Months, *num),
-            RepeatingDate::Years(num) => (RepeatType::Years, *num),
-        }
-    }
-}
 
 pub struct Data {} // User data, which is stored and accessible in all command invocations
 pub type Error = Box<dyn std::error::Error + Send + Sync>;
