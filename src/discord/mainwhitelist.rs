@@ -6,6 +6,8 @@ use crate::commonio::*;
 use super::checks::*;
 use super::common::check_userid;
 
+use poise::serenity_prelude as serenity;
+
 /// Admin only command to add users to the admin whitelist
 #[poise::command(slash_command, check = "admin_check")]
 pub async fn adduser(
@@ -153,4 +155,47 @@ pub async fn register(
             return Err(e);
         }
     }
+}
+
+#[poise::command(slash_command, check = "channel_check")]
+pub async fn checkregistered(
+    ctx: Context<'_>,
+    #[rest]
+    #[description = "User to check"]
+    user: serenity::User,
+) -> Result<(), Error> {
+    let id = user.id.0;
+
+    let dir = get_dir()?;
+    let file_path = dir.join("usersauth.txt");
+
+    let mut file = try_get_file(Some(&ctx), &file_path).await?;
+
+    file.lock_shared()?;
+    let userid = ctx.author().id.0.to_string();
+    
+    let buf = BufReader::new(&mut file);
+    let mut lines_reader = buf.lines();
+    let mut lines: Vec<String> = Vec::new();
+
+    while let Some(next_line) = lines_reader.next_line().await? {
+        lines.push(next_line);
+    }
+
+    let mut record: Option<String> = None;
+    for line_i in &mut lines {
+        if line_i.starts_with(&userid){
+            record = Some(line_i.clone());
+        }
+    }
+    file.unlock()?;
+
+    if let Some(rec) = record {
+        let uid = rec.split('=').into_iter().last().unwrap();
+        ctx.send(|b| b.allowed_mentions(|b| b.empty_roles().empty_users()).content(format!("<@{id}> is registered with UserID {uid}"))).await?;
+    } else {
+        ctx.say("No such user is registered").await?;
+    }
+
+    Ok(())
 }
