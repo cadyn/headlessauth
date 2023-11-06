@@ -51,8 +51,8 @@ pub async fn status(
     let (_file_path, file, data) = load_json::<ClosedData>(Some(&ctx),"closed.json".to_string(), true).await?;
     file.unlock()?;
 
-    let (_file_path, file, gendata) = load_json::<GeneralData>(Some(&ctx),"data.json".to_string(), true).await?;
-    file.unlock()?;
+    let (_file_path, genfile, gendata) = load_json::<GeneralData>(Some(&ctx),"data.json".to_string(), true).await?;
+    genfile.unlock()?;
 
     let mut num_players: Option<usize> = None;
     if let Some(url) = gendata.info_api {
