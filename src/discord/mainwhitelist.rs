@@ -173,7 +173,7 @@ pub async fn checkregistered(
     let mut file = try_get_file(Some(&ctx), &file_path).await?;
 
     file.lock_shared()?;
-    let userid = ctx.author().id.0.to_string();
+    let userid = id.to_string();
     
     let buf = BufReader::new(&mut file);
     let mut lines_reader = buf.lines();
