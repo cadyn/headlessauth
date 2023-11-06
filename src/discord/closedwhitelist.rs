@@ -148,10 +148,7 @@ pub async fn addcloseevent(
 
     write_tmp_and_copy(&ctx, &file_path, file, &serde_json::to_string(&data)?).await?;
     
-    let t_string = t.to_string();
-    let plural = (n>1) as usize;
-    
-    let type_s: &str =  &t_string[0..t_string.len()-plural];
+    let type_s = t.with_plurality(n);
 
     let to_say = format!("Added event to close every {n} {type_s} starting on <t:{timestamp}:f>");
     ctx.say(to_say).await?;
@@ -181,10 +178,7 @@ pub async fn addopenevent(
 
     write_tmp_and_copy(&ctx, &file_path, file, &serde_json::to_string(&data)?).await?;
     
-    let t_string = t.to_string();
-    let plural = (n>1) as usize;
-    
-    let type_s: &str =  &t_string[0..t_string.len()-plural];
+    let type_s = t.with_plurality(n);
 
     let to_say = format!("Added event to open every {n} {type_s} starting on <t:{timestamp}:f>");
     ctx.say(to_say).await?;
@@ -205,10 +199,7 @@ pub async fn removeopenevent(
 
         let (t, n) = (value.repeating.t, value.repeating.n);
         
-        let t_string = t.to_string();
-        let plural = (n>1) as usize;
-        
-        let type_s: &str =  &t_string[0..t_string.len()-plural];
+        let type_s = t.with_plurality(n);
         let most_recent = value.most_recent();
 
         write_tmp_and_copy(&ctx, &file_path, file, &serde_json::to_string(&data)?).await?;
@@ -237,10 +228,7 @@ pub async fn removecloseevent(
 
         let (t, n) = (value.repeating.t, value.repeating.n);
 
-        let t_string = t.to_string();
-        let plural = (n>1) as usize;
-        
-        let type_s: &str =  &t_string[0..t_string.len()-plural];
+        let type_s = t.with_plurality(n);
         let most_recent = value.most_recent();
 
         write_tmp_and_copy(&ctx, &file_path, file, &serde_json::to_string(&data)?).await?;
@@ -271,10 +259,7 @@ pub async fn listevents(
         for event in data.open_events.values() {
             let most_recent = event.most_recent();
             let (t,n) = (event.repeating.t, event.repeating.n);
-            let t_string = t.to_string();
-            let plural = (n>1) as usize;
-            
-            let type_s: &str =  &t_string[0..t_string.len()-plural];
+            let type_s = t.with_plurality(n);
             let val = format!("<t:{most_recent}:f> every {n} {type_s}");
             embed.field(event.id, val, false);
         }
@@ -288,10 +273,7 @@ pub async fn listevents(
         for event in data.close_events.values() {
             let most_recent = event.most_recent();
             let (t,n) = (event.repeating.t, event.repeating.n);
-            let t_string = t.to_string();
-            let plural = (n>1) as usize;
-            
-            let type_s: &str =  &t_string[0..t_string.len()-plural];
+            let type_s = t.with_plurality(n);
             let val = format!("<t:{most_recent}:f> every {n} {type_s}");
             embed.field(event.id, val, false);
         }

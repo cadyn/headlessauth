@@ -12,6 +12,17 @@ pub enum RepeatType {
     Years,
 }
 
+impl RepeatType {
+    pub fn with_plurality(&self,n: i64) -> String {
+        let singular = (n <= 1) as usize;
+        let t_string = self.to_string();
+        
+        let type_s = &t_string[0..t_string.len()-singular];
+
+        return type_s.to_string();
+    }
+}
+
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RepeatingEvent {
