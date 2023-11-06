@@ -169,7 +169,7 @@ pub async fn addopenevent(
 ) -> Result<(),Error> {
     let (file_path, file, mut data) = load_json::<ClosedData>(Some(&ctx),"closed.json".to_string(), false).await?;
     
-    let current_id: usize = if data.close_events.is_empty() {0} else {
+    let current_id: usize = if data.open_events.is_empty() {0} else {
         *data.open_events.keys().max().unwrap() + 1
     };
 
