@@ -282,29 +282,3 @@ pub async fn listevents(
     Ok(())
 }
 
-/// Check whether the headless is in open or closed mode
-#[poise::command(slash_command, check = "channel_check")]
-pub async fn status(
-    ctx: Context<'_>,
-) -> Result<(), Error> {
-    let (_file_path, _file, data) = load_json::<ClosedData>(Some(&ctx),"closed.json".to_string(), true).await?;
-    _file.unlock()?;
-
-    let next_close = data.next_close_event();
-    let next_open = data.next_open_event();
-    let close_status = match data.is_closed {
-        ClosedStatus::Open => "Manually open",
-        ClosedStatus::Closed => "Manually closed",
-        ClosedStatus::Automatic => if data.is_currently_closed() {"Automatically closed"} else {"Automatically open"},
-    };
-
-    ctx.send(|b| b.embed(|embed| {
-        embed.title("Headless whitelist status");
-        embed.field("Current status", close_status, false);
-        embed.field("Next scheduled closing", format!("<t:{next_close}:f>"), false);
-        embed.field("Next scheduled opening", format!("<t:{next_open}:f>"), false);
-        embed
-    })).await?;
-
-    Ok(())
-}

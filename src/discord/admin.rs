@@ -83,3 +83,23 @@ pub async fn removerole (
     ctx.say("Role is not in admins.").await?;
     Ok(())
 }
+
+/// Admin only command to set URL for headless info
+#[poise::command(slash_command, check = "admin_check")]
+pub async fn setinfourl (
+    ctx: Context<'_>,
+    #[rest]
+    #[description = "URL"]
+    url: Option<String>
+) -> Result<(),Error> {
+    let (file_path, file, mut data) = load_json::<GeneralData>(Some(&ctx),"data.json".to_string(), false).await?;
+
+    data.info_api = url.clone();
+
+    write_tmp_and_copy(&ctx, &file_path, file, &serde_json::to_string(&data)?).await?;
+
+    let to_say = if let Some(val) = url {format!("Successfully set info URL to {val}")} else {"Successfuly unset info URL".to_string()};
+
+    ctx.say(to_say).await?;
+    Ok(())
+}

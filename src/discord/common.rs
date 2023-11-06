@@ -7,10 +7,11 @@ use crate::commonio::*;
 pub struct GeneralData {
     pub channel_id: Option<u64>,
     pub admin_roles: Option<Vec<u64>>,
+    pub info_api: Option<String>,
 }
 
 impl Default for GeneralData {
-    fn default() -> Self {GeneralData{channel_id: None, admin_roles: None}}
+    fn default() -> Self {GeneralData{channel_id: None, admin_roles: None, info_api: None}}
 }
 
 pub async fn check_userid(ctx: &Context<'_>, uid: &str) -> Result<bool,Error>{

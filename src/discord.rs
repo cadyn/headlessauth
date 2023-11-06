@@ -4,6 +4,7 @@ pub mod checks;
 pub mod common;
 pub mod closedwhitelist;
 
+use fs4::tokio::AsyncFileExt;
 use serde::{Serialize, Deserialize};
 
 use poise::serenity_prelude as serenity;
@@ -12,6 +13,7 @@ use checks::*;
 use mainwhitelist::*;
 use admin::*;
 use closedwhitelist::*;
+use common::GeneralData;
 use crate::commonio::*;
 
 
@@ -24,6 +26,61 @@ struct UserResponse {
 #[derive(Serialize,Deserialize,Debug)]
 struct UserData {
     id: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(transparent)]
+struct PlayerList {
+    list: Vec<Player>
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+
+struct Player {
+    username: String,
+    userid: String,
+    jointime: i64,
+    pfp: Option<String>,
+}
+
+/// Get overall headless status
+#[poise::command(slash_command, check = "channel_check")]
+pub async fn status(
+    ctx: Context<'_>,
+) -> Result<(), Error> {
+    let (_file_path, file, data) = load_json::<ClosedData>(Some(&ctx),"closed.json".to_string(), true).await?;
+    file.unlock()?;
+
+    let (_file_path, file, gendata) = load_json::<GeneralData>(Some(&ctx),"data.json".to_string(), true).await?;
+    file.unlock()?;
+
+    let mut num_players: Option<usize> = None;
+    if let Some(url) = gendata.info_api {
+        let response = reqwest::get(format!("{url}/list")).await?.json::<PlayerList>().await?;
+        num_players = Some(response.list.len());
+    }
+
+    let next_close = data.next_close_event();
+    let next_open = data.next_open_event();
+    let close_status = match data.is_closed {
+        ClosedStatus::Open => "Manually open",
+        ClosedStatus::Closed => "Manually closed",
+        ClosedStatus::Automatic => if data.is_currently_closed() {"Automatically closed"} else {"Automatically open"},
+    };
+
+    ctx.send(|b| b.embed(|embed| {
+        embed.color(serenity::colours::branding::BLURPLE);
+        embed.title("Headless status");
+        embed.field("Current whitelist status", close_status, false);
+        embed.field("Next scheduled whitelist closing", format!("<t:{next_close}:f>"), false);
+        embed.field("Next scheduled whitelist opening", format!("<t:{next_open}:f>"), false);
+        if let Some(players) = num_players {
+            embed.field("Number of players online", format!("{players}"), false);
+        }
+        embed
+    })).await?;
+
+    Ok(())
 }
 
 /// Gets the Resonite UserID from a given username.
@@ -64,7 +121,7 @@ pub async fn help(ctx: Context<'_>, command: Option<String>) -> Result<(), Error
 pub async fn discord() {
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: vec![register(),userid(),status(),help(),setchannel(),addrole(),removerole(),adduser(),removeuser(),adduserclosed(),removeuserclosed(),setclosed(),addcloseevent(),removecloseevent(),addopenevent(),removeopenevent(),listevents()],
+            commands: vec![register(),userid(),status(),help(),setchannel(),addrole(),removerole(),adduser(),removeuser(),adduserclosed(),removeuserclosed(),setclosed(),addcloseevent(),removecloseevent(),addopenevent(),removeopenevent(),listevents(),setinfourl()],
             ..Default::default()
         })
         .token(std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN"))
