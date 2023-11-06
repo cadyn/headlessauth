@@ -125,7 +125,7 @@ pub async fn help(ctx: Context<'_>, command: Option<String>) -> Result<(), Error
 pub async fn discord() {
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: vec![register(),userid(),status(),help(),setchannel(),addrole(),removerole(),adduser(),removeuser(),adduserclosed(),removeuserclosed(),setclosed(),addcloseevent(),removecloseevent(),addopenevent(),removeopenevent(),listevents(),setinfourl()],
+            commands: vec![register(),userid(),status(),help(),setchannel(),addrole(),removerole(),adduser(),removeuser(),adduserclosed(),removeuserclosed(),setclosed(),addcloseevent(),removecloseevent(),addopenevent(),removeopenevent(),listevents(),setinfourl(),checkregistered()],
             ..Default::default()
         })
         .token(std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN"))
