@@ -19,7 +19,7 @@ impl RepeatType {
         
         let type_s = &t_string[0..t_string.len()-singular];
 
-        return type_s.to_string();
+        return type_s.to_string().to_lowercase();
     }
 }
 
