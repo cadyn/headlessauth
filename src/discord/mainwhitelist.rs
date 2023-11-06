@@ -157,7 +157,8 @@ pub async fn register(
     }
 }
 
-#[poise::command(slash_command, check = "channel_check")]
+/// Admin only command to check a user's registered UserID
+#[poise::command(slash_command, check = "admin_check")]
 pub async fn checkregistered(
     ctx: Context<'_>,
     #[rest]
